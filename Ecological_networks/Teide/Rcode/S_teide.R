@@ -102,6 +102,7 @@ count2<-rep(1, nrow(visitas.raj))
 visitas.raj<-cbind(visitas.raj, count2)
 riqueza.raj<-aggregate(count2~orden, visitas.raj, sum)   
 riqueza.raj.tot<-sum(riqueza.raj$count2)   #68 spps
+riqueza.raj.family<-aggregate(count~ orden*familia, dat.raj, sum)
 visitas.raj.tot<-sum(visitas.raj$count)   #1011
 visitas.raj.tot.order<-aggregate(count~orden, visitas.raj, sum)
 int.raj<-data.frame(paste(dat.raj$planta,dat.raj$acro, sep="") )
@@ -157,17 +158,29 @@ barplot(riqueza.teide$torre, col=c(2,3,7,4,8,5,6), main="3500 m",xlab="Insect or
 
 colnames(riqueza.teide)<-c("orden","2400", "2700","3200","3500")
 colnames(visitas.teide)<-c("orden","2400", "2700","3200","3500")
-par(mfrow=c(1,2), mar=c(4,4.5,1,1))
-b2<-barplot(as.matrix(riqueza.teide[,2:5]),col=c(2,3,7,4,8,5,6),ylab="Flower-visitor richness (n)", ylim=c(0,100), xlab="Elevation (m)") 
-#legend(2.5,90, inset=0.03,levels(riqueza.teide$orden),fill=c(2,3,7,4,8,5,6), bty="n", trace=TRUE, cex=0.8)
 
-b2<-barplot(as.matrix(visitas.teide[,2:5]),col=c(2,3,7,4,8,5,6),ylab="Number of visits(n)", ylim=c(0,1700), xlab="Elevation (m)") 
-legend(2.5,1700, inset=0.03,levels(visitas.teide$orden),fill=c(2,3,7,4,8,5,6), bty="n", trace=TRUE, cex=0.8)
+par(mfrow=c(1,2), mar=c(2.5,3.2,0.8,0.2))
+b2<-barplot(as.matrix(riqueza.teide[1:5,2:5]),col=gray.colors(5, 0,0.9),ylab="Flower-visitor richness (n)", ylim=c(0,100), xlab="Elevation (m)",cex.axis=0.8, cex.lab=0.8, cex.names=0.8, border=NA) 
+#legend(3,100, inset=0.03,legend=c("Coleoptera","Diptera","Hemiptera","Hymenoptera","Lepidoptera"),fill=gray.colors(5, 0,1), bty="n", trace=TRUE, cex=0.7)
+
+b2<-barplot(as.matrix(visitas.teide[1:5,2:5]),col=gray.colors(5, 0,0.9),ylab="Number of visits(n)", ylim=c(0,2000), xlab="Elevation (m)",cex.axis=0.8, cex.lab=0.8, cex.names=0.8, border=NA) 
+legend(2.3,2000, inset=0.03,legend=c("Coleoptera","Diptera","Hemiptera","Hymenoptera","Lepidoptera"),fill=gray.colors(5, 0,0.9), bty="n", trace=TRUE, cex=0.7)
  
-### 2.5 Richness per order
-par(mfrow=c(1,1), mar=c(4,4,1,2))
-visitas<-cbind("2400"=visitas.raj.tot, "2700"=visitas.blan.tot, "3200"=visitas.refu.tot, "3500"=visitas.torre.tot)
-barplot(visitas, ylim=c(0,2000), ylab="Visits (n)", cex.axis=0.8, col="gray60", xlab="Elevation (m)", cex=0.8)
+### 2.5 Richness per family & order
+riqueza.family<-aggregate(count~ orden*familia*localidad, dat.tot, sum )
+count1<-rep(1, nrow(riqueza.family))
+riqueza.family<-cbind(riqueza.family,count1)
+riqueza.family<-aggregate(count1~ orden*localidad, riqueza.family, sum )
+riqueza.family<-riqueza.family[order(riqueza.family$orden),]
+elevation<-ifelse(riqueza.family$localidad=="rajada",2400,ifelse(riqueza.family$localidad=="blanca", 2700,ifelse(riqueza.family$localidad=="Refugio", 3200,3500)))
+riqueza.family=cbind(riqueza.family,elevation)
+
+par(mfrow=c(2,2), mar=c(3,2.5,0.5,0.5))
+barplot(riqueza.family[1:4,3],  ylim=c(0,20),col=gray.colors(4, 0.3,0.9),ylab="Flower-visitor richness (n)", xlab="Elevation (m)",cex.axis=0.8, cex.lab=0.8, cex.names=0.8,cex.main=0.8,   main="Coleoptera", border=NA)
+barplot(riqueza.family[5:8,3],  ylim=c(0,20),  col=gray.colors(4, 0.3,0.9), xlab="Elevation (m)",cex.axis=0.8, cex.lab=0.8, cex.names=0.8,cex.main=0.8,   main="Diptera", border=NA)
+barplot(riqueza.family[13:16,3],  ylim=c(0,20),  col=gray.colors(4, 0.3,0.9),ylab="Flower-visitor richness (n)", xlab="Elevation (m)",cex.axis=0.8, cex.lab=0.8, cex.names=0.8,  names.arg=riqueza.family[1:4,4],cex.main=0.8, main="Himenoptera", border=NA)
+barplot(riqueza.family[17:20,3],  ylim=c(0,20),  col=gray.colors(4, 0.3,0.9), xlab="Elevation (m)",cex.axis=0.8, cex.lab=0.8, cex.names=0.8,  names.arg=riqueza.family[1:4,4],cex.main=0.8, main="Lepidoptera", border=NA)
+
 
 ######################### 3. Bipartite analysis ############################
 
@@ -1170,5 +1183,30 @@ boxplot(df.elevel$z ~df.elevel$elevation.num, ylab="Participation, z")
 (kt.wc<-kruskal.test(Wclos ~ elevation.num, data = df.elevel)   ) 
 (kt.s<-kruskal.test(strength ~ elevation.num, data = df.elevel)  ) 
 (kt.cmod<-kruskal.test(c ~ elevation.num, data = df.elevel) )  
-(kt.zmod<-kruskal.test(z ~ elevation.num, data = df.elevel)    ) 
+(kt.zmod<-kruskal.test(z ~ elevation.num, data = df.elevel)  ) 
 
+#########################   8. Rarefaction curves    ######################### 
+
+# Source the rarefaction function by typing
+        source("http://www.jennajacobs.org/R/rarefaction.txt") #source the function from the website.
+
+# The rarefaction function is rarefaction(x, subsample=5, plot=TRUE, color=TRUE, error=FALSE,  legend=TRUE, symbol)
+                where x= the datamatrix
+                subsample= the interval betwwen subsamples (default is 5)  
+                plot= if you want the function to plot the results
+                color= if you want the plot in color (TRUE) or black and white (FALSE)
+                error=  if you want the plot to show the iterative error around the mean
+                legend= if you want a legend
+                symbol= a vector of symbols to correspond with treatments [eg. c(1,2,3)]
+
+
+dat.rarefaction<-table(dat.tot$localidad, dat.tot$acro)
+library(vegan)
+
+#Rarefaction of the dataset
+dat.rarefaed<-rarefaction(dat.rarefaction, col=F) # I'm a big fan of B&W
+
+#The rarefaction function creates 3 objects to access them type
+dat.rarefaed$richness # a matrix of the mean richness at each subsample
+dat.rarefaed$SE  # a matrix of the iterative SE of the mean richness at each subsample
+dat.rarefaed$subsample # the subsample sizes used to find the means
