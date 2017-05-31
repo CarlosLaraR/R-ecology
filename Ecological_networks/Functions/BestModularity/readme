@@ -1,4 +1,4 @@
-#Function F_best_modularity stimate Modulairty of a bipartite network using the QuaBiMo algorithm (Q) by Dormann & Strauss.
+#F_best_modularity is a function written in R code that estimates Modulairty of a bipartite network using the QuaBiMo algorithm (Q) by Dormann & Strauss.
 
 The modularity value Q is simply the likelihood value. This value may vary between runs.
 
