@@ -4,5 +4,4 @@ print(max(results))
 results.max<- which (results== max(results))
 results.max<-results.max[1]
 mod.best<-mod.list[[results.max]]      
-return(mod.best)
- }
+return(mod.best) }
