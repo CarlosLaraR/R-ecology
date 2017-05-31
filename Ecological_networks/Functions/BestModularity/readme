@@ -1,0 +1,6 @@
+#Function to stimate Modulairty of a bipartite network using the QuaBiMo algorithm (Q) by Dormann & Strauss.
+
+The modularity value Q is simply the likelihood value. This value may vary between runs.
+
+This functions run 100 times the QuaBiMo algorithm and select the best solution (i.e., maximum likelihood). Then extract C & Z values from this solution.
+
