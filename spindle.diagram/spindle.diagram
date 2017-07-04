@@ -1,6 +1,3 @@
-
-
-
 spindle.diagram<-function(modulos_lara,title="plot",temp.var=NULL,relative=F,orientation="vertical",
                           predict.span=.75,x.interval=1,spindle.colors="black",size=.6)
 {
