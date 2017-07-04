@@ -1,4 +1,4 @@
-spindle.diagram<-function(modulos_lara,title="plot",temp.var=NULL,relative=F,orientation="vertical",
+spindle.diagram<-function(df,title="plot",temp.var=NULL,relative=F,orientation="vertical",
                           predict.span=.75,x.interval=1,spindle.colors="black",size=.6)
 {
   if (is.na(pmatch(orientation,c("vertical","horizontal")))) 
