@@ -1,0 +1,13 @@
+This function plots the temporal phenological spectra of a group of organisms using ah adjusted polynomial function over each group data.
+It is included in the package {forraGEO}.
+
+Author(s)
+
+Javier Valverde javi.val.mor@gmail.com
+
+References
+
+Valverde, J.; Calatayud, J.; Gómez, J.M. and Perfectti F. Variación intraestacional en los visitantes florales de Erysimum mediohispanicum en Sierra
+
+Nevada. Ecosistemas 2014 23 (3): 83-92.
+
