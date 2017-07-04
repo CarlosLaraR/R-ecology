@@ -1,0 +1,69 @@
+
+
+
+spindle.diagram<-function(modulos_lara,title="plot",temp.var=NULL,relative=F,orientation="vertical",
+                          predict.span=.75,x.interval=1,spindle.colors="black",size=.6)
+{
+  if (is.na(pmatch(orientation,c("vertical","horizontal")))) 
+    stop("invalid ordering method")
+  
+  if(is.null(temp.var)){temp<-as.numeric(rownames(df))}
+  if(is.numeric(temp.var))
+  {
+    temp<-df[,temp.var]
+    df<-df[,-temp.var]
+  }
+  if (is.vector(spindle.colors))
+  {
+    if (length(spindle.colors)==1){cols<-rep(spindle.colors,ncol(df))}
+    if(length(spindle.colors)>1)
+      {
+      if(length(spindle.colors)!=ncol(df))
+        stop("color vector length mismatch")
+      else
+        cols<-spindle.colors 
+      }
+  }
+  if(isTRUE(relative)){df<-df/rowSums(df)}
+    
+  # Loess predictions for each group
+  p.df<-df ; p.df[]<-NA
+  for (m in 1:ncol(df))
+  {
+    p.df[,m]<-predict(loess(df[,m]~temp,span=predict.span))
+    #a[which(M[,m]==0)]<-0
+    non.zero<-which(df[,m]>0)
+    if(isTRUE(min(non.zero)!=1)){p.df[1:min(non.zero),m]<-0}
+    if(isTRUE(max(non.zero)!=length(a))){p.df[max(non.zero):length(p.df[,m]),m]<-0} 
+  }
+  
+  # Starting point for each frequency shape
+  start.m<-cbind(cumsum(apply(df,2,function(x) max(x))),apply(df,2,function(x) max(x)/2))
+  for (s in 2:nrow(start.m))
+  {
+    start.m[s,2]<-start.m[s-1,1]+start.m[s,2]
+  }
+  start.m<-start.m[,2]
+  
+  if(isTRUE(orientation=="vertical"))
+  {
+   plot(0,xlim=c(0,sum(apply(df,2,max))),ylim=c(min(temp),max(temp)),
+        type="n",axes=F,xlab="",ylab="time",main=print(title))
+   abline(h=c(1,seq(from=1,to=max(temp),by=1)),col="grey95",lwd=6)
+   axis(2,at=seq(min(temp),max(temp),by=x.interval),las=2,cex.axis=size)
+   axis(1, at=start.m, labels=colnames(df),las=2,cex.axis=size)
+   for (p in 1:length(start.m))
+   {polygon(start.m[p]+(c(p.df[,p]/2,0-rev(p.df[,p]/2))),c(temp,rev(temp)),border="white",col=cols[p])}  
+ }
+  
+  if(isTRUE(orientation=="horizontal"))
+  {
+   plot(0,ylim=c(0,sum(apply(df,2,max))),xlim=c(min(temp),max(temp)),
+        type="n",axes=F,ylab="",xlab="time",main=print(title))
+   abline(v=c(1,seq(from=1,to=max(temp),by=1)),col="grey95",lwd=6)
+   axis(1,at=seq(min(temp),max(temp),by=x.interval),las=1,cex.axis=size)
+   axis(2, at=start.m, labels=colnames(df),las=1,cex.axis=size)
+   for (p in 1:length(start.m))
+   {polygon(c(temp,rev(temp)),start.m[p]+(c(p.df[,p]/2,0-rev(p.df[,p]/2))),border="white",col=cols[p])}  
+ }
+}
