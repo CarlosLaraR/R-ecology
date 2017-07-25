@@ -38,3 +38,10 @@ c <- as.dist(matrix(rep(S, each = N), nrow = N)) - a
 out = abs(b-c)/(a+b+c)
 out
 }
+#generate a list of the distance matrices of each diversity measure
+
+all.carv.beta <-list(beta.3=beta.3(site.spec),
+					betarich=beta.rich(site.spec),
+					beta.cc=beta.cc(site.spec))
+return(all.carv.beta)#return the list of distance matrices
+}
