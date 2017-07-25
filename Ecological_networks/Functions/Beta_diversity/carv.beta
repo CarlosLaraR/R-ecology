@@ -1,0 +1,40 @@
+#Modification of Carvalho et al.'s (2013) taxonomic beta partition to give a list output as Baselga et al.'s (2013) beta.pair function does
+
+carv.beta <- function(site.spec){# where site.spec is the site by species matrix you want 
+								 # to calculate beta diversity on
+beta.cc<-function (x)
+{
+x <- ifelse(x > 0, 1, 0)
+d <- tcrossprod(x)
+a <- as.dist(d)
+S <- diag(d)
+N <- length(S)
+b <- as.dist(matrix(rep(S, N), nrow = N)) - a
+c <- as.dist(matrix(rep(S, each = N), nrow = N)) - a
+out = (b+c)/(a+b+c)
+out
+}
+beta.3<-function (x)
+{
+x <- ifelse(x > 0, 1, 0)
+d <- tcrossprod(x)
+a <- as.dist(d)
+S <- diag(d)
+N <- length(S)
+b <- as.dist(matrix(rep(S, N), nrow = N)) - a
+c <- as.dist(matrix(rep(S, each = N), nrow = N)) - a
+out = 2*pmin(b,c)/(a+b+c)
+out
+}
+beta.rich<-function (x)
+{
+x <- ifelse(x > 0, 1, 0)
+d <- tcrossprod(x)
+a <- as.dist(d)
+S <- diag(d)
+N <- length(S)
+b <- as.dist(matrix(rep(S, N), nrow = N)) - a
+c <- as.dist(matrix(rep(S, each = N), nrow = N)) - a
+out = abs(b-c)/(a+b+c)
+out
+}
