@@ -1,0 +1,558 @@
+###########################################################################
+##Code necessary  to reproduce analyses in Naranjo et al 2019, AoB Plants##
+###		           Author: Carlos Lara (February 2019)                    ###
+###########################################################################
+
+library(bipartite)
+library(vegan)
+library(lme4)
+ 
+####@@@@@@@@@@@@@@@@@@@@@@@@@@@@#######
+#### 1. Calculating network metrics####
+####@@@@@@@@@@@@@@@@@@@@@@@@@@@@#######
+
+####1.1 Epiphyte-Tree, Comensalistic Networks####
+
+setwd("C:/Users/carlos/Documents/SCIENCE/PROYECTOS/UTPL/Epifitas/analisis/comensalistic")                                    
+files <- list.files(pattern="*.txt", full.names=T, recursive=FALSE)
+
+#####Using lapply to apply a funtion to each file
+
+####Between-module connector values (c-values)
+lapply(files, function(x) {
+    t <- read.table(x) # load file
+    # apply function
+    mod.list<- replicate(5, computeModules(t, steps=1E8))
+    out=max(sapply(mod.list, function(x) x@likelihood)    )
+     out.max<- which (out== max(out))
+out.max<-out.max[1]
+mod.best<-mod.list[[out.max]]      
+ cz.h <- czvalues(mod.best,weighted=TRUE, level="higher")
+ cz.l <- czvalues(mod.best,weighted=TRUE, level="lower")
+ cz<-c(cz.h[[1]],  cz.l[[1]])
+ p<-x
+ out<-cbind(cz,p)
+ # write to file
+write.table(out, "out_comensalistic_cz.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+####Specificity d
+
+lapply(files, function(x) {
+    tl <- read.table(x) # load file
+    # apply function
+    out <- dfun(tl)[1]
+    p<-x
+    out<-c(out,p)
+     # write to file
+    write.table(out, "out_comensalistic_d_low.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+lapply(files, function(x) {
+    th <- read.table(x) # load file
+    # apply function
+    out <- dfun(t(th))[1]
+     p<-x
+    out<-c(out,p)
+    # write to file
+    write.table(out, "out_comensalistic_d_high.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+ ####Interactions
+ 
+lapply(files, function(x) {
+    t <- read.table(x, header=T) # load file
+    # apply function
+    out <- length(which(t[,]>0))
+    # write to file
+    write.table(out, "out_comensalistic_inter.txt",append=T,sep="\t", quote=F, row.names=F, col.names=T)
+})
+
+####H2
+lapply(files, function(x) {
+    t <- read.table(x) # load file
+    # apply function
+    out <- H2fun(t)[1]
+    # write to file
+    write.table(out, "out_comensalistic_H2.txt",append=T,sep="\t", quote=F, row.names=F, col.names=T)
+})
+
+####wNODF
+lapply(files, function(x) {
+    t <- read.table(x) # load file
+    # apply function         
+      out2<-nested(t, method ="weighted NODF")  
+      out3<-cbind(out,out2)  
+    # write to file
+    write.table(out3, "out_comensalistic_NODF2.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+####NODF and pvalue
+   lapply(files, function(x) {
+    t <- read.table(x, header=F) # load file
+    # apply function
+      out<-oecosimu(t,nestednodf,method="r00", nsimul=1000, weighted=F)
+      out<-cbind(out$oecosimu$statistic[3],out$oecosimu$pval[3])
+    # write to file
+    write.table(out, "out_comenssalistic_NODF_oecosium1000.txt",append=T,sep="\t", quote=F, row.names=F, col.names=T)
+}) 
+
+web<-read.table("M_EP_001.txt")
+out<-oecosimu(web,nestednodf,method="rd2", nsimul=1000, weighted=T) 
+out1<-cbind(out$oecosimu$statistic[3],out$oecosimu$pval[3],out$oecosimu$z[3])
+ 
+     
+web<-read.table("M_EP_002.txt")
+  out<-oecosimu(web,nestednodf,method="r00", nsimul=1000, weighted=F)
+    out2<-cbind(out$oecosimu$statistic[3],out$oecosimu$pval[3],out$oecosimu$z[3]) 
+   
+    
+web<-read.table("M_EP_003.txt")
+  out<-oecosimu(web,nestednodf,method="r00", nsimul=1000, weighted=F)
+    out3<-cbind(out$oecosimu$statistic[3],out$oecosimu$pval[3],out$oecosimu$z[3]) 
+    
+     
+web<-read.table("M_EP_004.txt")
+  out<-oecosimu(web,nestednodf,method="r00", nsimul=10000,  weighted=F)
+  out4<-cbind(out$oecosimu$statistic[3],out$oecosimu$pval[3],out$oecosimu$z[3])  
+
+web<-read.table("M_EP_006.txt")
+    out<-oecosimu(web,nestednodf,method="r00", nsimul=1000,  weighted=F)
+  out6<-cbind(out$oecosimu$statistic[3],out$oecosimu$pval[3],out$oecosimu$z[3])  
+
+web<-read.table("M_EP_008.txt")
+  out<-oecosimu(web,nestednodf,method="r00", nsimul=1000,  weighted=F)
+  out8<-cbind(out$oecosimu$statistic[3],out$oecosimu$pval[3],out$oecosimu$z[3])  
+    
+web<-read.table("M_EP_009.txt")
+  out<-oecosimu(web,nestednodf,method="r00", nsimul=1000,  weighted=F)
+  out9<-cbind(out$oecosimu$statistic[3],out$oecosimu$pval[3],out$oecosimu$z[3]) #*** 
+
+web<-read.table("M_EP_013.txt")
+  out<-oecosimu(web,nestednodf,method="r00", nsimul=1000,  weighted=F)
+  out13<-cbind(out$oecosimu$statistic[3],out$oecosimu$pval[3],out$oecosimu$z[3])  #***
+  
+web<-read.table("M_EP_005.txt")     
+  out<-oecosimu(web,nestednodf,method="r00", nsimul=1000,  weighted=F)
+  out5<-cbind(out$oecosimu$statistic[3],out$oecosimu$pval[3],out$oecosimu$z[3]) 
+  
+web<-read.table("M_EP_007.txt")
+  out<-oecosimu(web,nestednodf,method="r00", nsimul=1000,  weighted=F)
+  out7<-cbind(out$oecosimu$statistic[3],out$oecosimu$pval[3],out$oecosimu$z[3])    #error 
+
+###modularity
+lapply(files, function(x) {
+    t <- read.table(x) # load file
+    # apply function
+    out<- replicate(10, computeModules(t, steps=1E8))
+    out=max(sapply(out, function(x) x@likelihood)    )
+         # write to file
+write.table(out, "out_comensalistic_MOD.txt",append=T,sep="\t", quote=F, row.names=F, col.names=T)
+})
+
+####Modularity p value
+
+#M_EP_001.txt
+web.1<-read.table("M_EP_001.txt")
+Q1<-0.11
+nulls.1 <- nullmodel(web.1, N=100, method="r2d")
+modules.nulls.1 <- sapply(nulls.1, computeModules)
+like.nulls.1 <- sapply(modules.nulls.1, function(x) x@likelihood)
+(z1 <- (Q1 - mean(like.nulls.1))/sd(like.nulls.1))   # z=1.19, p= 0.234046
+
+#M_EP_002.txt
+web.2<-read.table("M_EP_002.txt")
+Q2<-0.09
+nulls.2 <- nullmodel(web.2, N=100, method="r2d")
+modules.nulls.2 <- sapply(nulls.2, computeModules)
+like.nulls.2 <- sapply(modules.nulls.2, function(x) x@likelihood)
+(z2 <- (Q2 - mean(like.nulls.2))/sd(like.nulls.2))   #   z=0.6678,  P=0.504261.
+
+#M_EP_003.txt
+web.3<-read.table("M_EP_003.txt")
+Q3<-0.08
+nulls.3 <- nullmodel(web.3, N=100, method="r2d")
+modules.nulls.3 <- sapply(nulls.3, computeModules)
+like.nulls.3 <- sapply(modules.nulls.3, function(x) x@likelihood)
+(z3 <- (Q3 - mean(like.nulls.3))/sd(like.nulls.3))   #   z= 0.3058463,  P=0.760366
+
+#M_EP_004.txt
+web.4<-read.table("M_EP_004.txt")
+Q4<-0.09
+nulls.4 <- nullmodel(web.4, N=100, method="r2d")
+modules.nulls.4 <- sapply(nulls.4, computeModules)
+like.nulls.4 <- sapply(modules.nulls.4, function(x) x@likelihood)
+(z4 <- (Q4 - mean(like.nulls.4))/sd(like.nulls.4))   #   z= 33.83042,  P< 0.00001
+
+#M_EP_005.txt
+web.5<-read.table("M_EP_005.txt")
+Q5<-0.18
+nulls.5 <- nullmodel(web.5, N=100, method="r2d")
+modules.nulls.5 <- sapply(nulls.5, computeModules)
+like.nulls.5 <- sapply(modules.nulls.5, function(x) x@likelihood)
+(z5 <- (Q5 - mean(like.nulls.5))/sd(like.nulls.5))   #   z= 8.83253,  P< 0.00001
+
+#M_EP_006.txt
+web.6<-read.table("M_EP_006.txt")
+Q6<-0.28
+nulls.6 <- nullmodel(web.6, N=100, method="r2d")
+modules.nulls.6 <- sapply(nulls.6, computeModules)
+like.nulls.6 <- sapply(modules.nulls.6, function(x) x@likelihood)
+(z6 <- (Q6 - mean(like.nulls.6))/sd(like.nulls.6))   #   z= 23.54956,  P< 0.00001
+
+#M_EP_007.txt
+web.7<-read.table("M_EP_007.txt")
+Q7<-0.17
+nulls.7 <- nullmodel(web.7, N=100, method="r2d")
+modules.nulls.7 <- sapply(nulls.7, computeModules)
+like.nulls.7 <- sapply(modules.nulls.7, function(x) x@likelihood)
+(z7 <- (Q7 - mean(like.nulls.7))/sd(like.nulls.7))   #   z= 40.49,  P< 0.00001
+
+#M_EP_008.txt
+web.8<-read.table("M_EP_008.txt")
+Q8<-0.22
+nulls.8 <- nullmodel(web.8, N=100, method="r2d")
+modules.nulls.8 <- sapply(nulls.8, computeModules)
+like.nulls.8 <- sapply(modules.nulls.8, function(x) x@likelihood)
+(z8 <- (Q8 - mean(like.nulls.8))/sd(like.nulls.8))   #   z= 5.41,  P< 0.00001
+
+#M_EP_009.txt
+web.9<-read.table("M_EP_009.txt")
+Q9<-0.13
+nulls.9 <- nullmodel(web.9, N=100, method="r2d")
+modules.nulls.9 <- sapply(nulls.9, computeModules)
+like.nulls.9 <- sapply(modules.nulls.9, function(x) x@likelihood)
+(z9 <- (Q9 - mean(like.nulls.9))/sd(like.nulls.9))   #   z=  148.9044,  P< 0.00001
+
+#M_EP_013.txt
+web.13<-read.table("M_EP_013.txt")
+Q13<-0.18
+nulls.13 <- nullmodel(web.13, N=100, method="r2d")
+modules.nulls.13 <- sapply(nulls.13, computeModules)
+like.nulls.13 <- sapply(modules.nulls.13, function(x) x@likelihood)
+(z13 <- (Q13 - mean(like.nulls.13))/sd(like.nulls.13))   #   z= 7.2,  P< 0.00001
+
+#######1.2 POLLINATION ########
+
+setwd("C:/Users/carlos/Documents/SCIENCE/PROYECTOS/UTPL/Epifitas/analisis/polinizacion")
+files <- list.files(pattern="*.txt", full.names=T, recursive=FALSE)
+
+#####Using lapply to apply a funtion to each file#####
+
+####Between-module connector values (c-values)
+lapply(files, function(x) {
+    t <- read.table(x) # load file
+    # apply function
+    mod.list<- replicate(5, computeModules(t, steps=1E8))
+    out=max(sapply(mod.list, function(x) x@likelihood)    )
+     out.max<- which (out== max(out))
+out.max<-out.max[1]
+mod.best<-mod.list[[out.max]]      
+ cz.h <- czvalues(mod.best,weighted=TRUE, level="higher")
+ cz.l <- czvalues(mod.best,weighted=TRUE, level="lower")
+ cz<-c(cz.h[[1]],  cz.l[[1]])
+ p<-x
+ out<-cbind(cz,p)
+             # write to file
+    write.table(out, "out_pollination_cz.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+####Specificity d
+
+lapply(files, function(x) {
+    tl <- read.table(x) # load file
+    # apply function
+    out <- dfun(tl)[1]
+     p<-x
+    out<-c(out,p)
+    # write to file
+    write.table(out, "out_pollination_d_low.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+lapply(files, function(x) {
+    th <- read.table(x) # load file
+    # apply function
+    out <- dfun(t(th))[1]
+     p<-x
+    out<-c(out,p)
+    # write to file
+    write.table(out, "out_pollination_d_high.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+####H2
+
+lapply(files, function(x) {
+    t <- read.table(x, header=F) # load file
+    # apply function
+    out <- H2fun(t)[1]
+    # write to file
+    write.table(out, "out_pollination_H2.txt",append=T,sep="\t", quote=F, row.names=F, col.names=T)
+})
+
+####NODF
+
+lapply(files, function(x) {
+    t <- read.table(x, header=F) # load file
+    # apply function
+      out<-oecosimu(t,nestednodf,method="r00", nsimul=1000, weighted=F)
+      out<-out$oecosimu$statistic[3]
+    # write to file
+    write.table(out, "out_pollination_NODF_binary.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+####wNODF
+
+lapply(files, function(x) {
+    t <- read.table(x) # load file
+    # apply function
+      out<-nested(t, method ="weighted NODF")        
+    # write to file
+    write.table(out, "out_pollination_wNODF.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+###modularity
+
+lapply(files, function(x) {
+    t <- read.table(x, header=F) # load file
+    # apply function
+    out<- replicate(10, computeModules(t, steps=1E8))
+    out=max(sapply(out, function(x) x@likelihood)    )
+         # write to file
+    write.table(out, "out_pollination_MOD.txt",append=T,sep="\t", quote=F, row.names=F, col.names=T)
+}) 
+
+#### 1.3 DISPERSION ####
+
+setwd("C:/Users/carlos/Documents/SCIENCE/PROYECTOS/UTPL/Epifitas/analisis/dispersal")
+files <- list.files(pattern="*.txt", full.names=T, recursive=FALSE)
+
+####Between-module connector values (c-values)
+lapply(files, function(x) {
+    t <- read.table(x) # load file
+    # apply function
+mod.list<- replicate(5, computeModules(t, steps=1E8))
+out=max(sapply(mod.list, function(x) x@likelihood)    )
+ out.max<- which (out== max(out))
+out.max<-out.max[1]
+mod.best<-mod.list[[out.max]]      
+ cz.h <- czvalues(mod.best,weighted=TRUE, level="higher")
+ cz.l <- czvalues(mod.best,weighted=TRUE, level="lower")
+ cz<-c(cz.h[[1]],  cz.l[[1]])
+ p<-x
+ out<-cbind(cz,p)
+             # write to file
+    write.table(out, "out_dispersal_cz.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+####Specificity d
+
+lapply(files, function(x) {
+    tl <- read.table(x) # load file
+    # apply function
+    out <- dfun(tl)[1]
+      p<-x
+    out<-c(out,p)
+    # write to file
+    write.table(out, "out_dispersal_d_low.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+
+lapply(files, function(x) {
+    th <- read.table(x) # load file
+    # apply function
+    out <- dfun(t(th))[1]
+      p<-x
+    out<-c(out,p)
+    # write to file
+    write.table(out, "out_dispersal_d_high.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+####H2
+lapply(files, function(x) {
+    t <- read.table(x, header=F) # load file
+    # apply function
+    out <- H2fun(t)[1]
+    # write to file
+    write.table(out, "out_dispersal_H2.txt",append=T,sep="\t", quote=F, row.names=F, col.names=T)
+})
+
+####NODF 
+lapply(files, function(x) {
+    t <- read.table(x, header=F) # load file
+    # apply function
+    out<-oecosimu(t,nestednodf,method="r00", nsimul=1000, weighted=F)
+      out<-cbind(out$oecosimu$statistic[3])
+    # write to file
+    write.table(out, "out_dispersal_NODF_binary.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+###wNODF
+lapply(files, function(x) {
+    t <- read.table(x) # load file
+    # apply function
+      out<-nested(t, method ="weighted NODF")        
+    # write to file
+    write.table(out, "out_dispersal_wNODF.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+###modularity
+lapply(files, function(x) {
+    t <- read.table(x, header=F) # load file
+    # apply function
+    out<- replicate(10, computeModules(t, steps=1E8))
+    out=max(sapply(out, function(x) x@likelihood)    )
+         # write to file
+    write.table(out, "out_dispersal_MOD.txt",append=T,sep="\t", quote=F, row.names=F, col.names=T)
+})
+
+####1.4 ANT-PLANT NETWORKS####
+
+setwd("C:/Users/carlos/Documents/SCIENCE/PROYECTOS/UTPL/Epifitas/analisis/ant_myrmec")
+files <- list.files(pattern="*.txt", full.names=T, recursive=FALSE)
+
+####Between-module connector values (c-values)
+lapply(files, function(x) {
+    t <- read.table(x) # load file
+    # apply function
+    mod.list<- replicate(5, computeModules(t, steps=1E8))
+    out=max(sapply(mod.list, function(x) x@likelihood)    )
+     out.max<- which (out== max(out))
+out.max<-out.max[1]
+mod.best<-mod.list[[out.max]]      
+ cz.h <- czvalues(mod.best,weighted=TRUE, level="higher")
+ cz.l <- czvalues(mod.best,weighted=TRUE, level="lower")
+ cz<-c(cz.h[[1]],  cz.l[[1]])
+ p<-x
+ out<-cbind(cz,p)
+# write to file
+    write.table(out, "out_ant_cz.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+#Specificity d'
+lapply(files, function(x) {
+    tl <- read.table(x) # load file
+    # apply function
+    out <- dfun(tl)[1]
+     p<-x
+    out<-c(out,p)
+    # write to file
+    write.table(out, "out_ant_d_low.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+lapply(files, function(x) {
+    th <- read.table(x) # load file
+    # apply function
+    out <- dfun(t(th))[1]
+     p<-x
+    out<-c(out,p)
+    # write to file
+    write.table(out, "out_ant_d_high.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+ 
+####H2
+lapply(files, function(x) {
+    t <- read.table(x, header=F) # load file
+    # apply function
+    out <- H2fun(t)[1]
+    # write to file
+    write.table(out, "out_ant_H2.txt",append=T,sep="\t", quote=F, row.names=F, col.names=T)
+})
+
+####NODF
+lapply(files, function(x) {
+    t <- read.table(x, header=F) # load file
+    # apply function
+       out<-oecosimu(t,nestednodf,method="r00", nsimul=1000, weighted=F)
+      out<-cbind(out$oecosimu$statistic[3])
+    # write to file
+    write.table(out, "out_ant_NODF_binary.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+      
+####wNODF
+lapply(files, function(x) {
+    t <- read.table(x) # load file
+    # apply function
+      out<-nested(t, method ="weighted NODF")        
+    # write to file
+    write.table(out, "out_ant_wNODF.txt",append=T,sep="\t", quote=F, row.names=F, col.names=F)
+})
+
+###modularity
+lapply(files, function(x) {
+    t <- read.table(x, header=F) # load file
+    # apply function
+    out<- replicate(10, computeModules(t, steps=1E8))
+    out=max(sapply(out, function(x) x@likelihood)    )
+         # write to file
+    write.table(out, "out_ant_MOD.txt",append=T,sep="\t", quote=F, row.names=F, col.names=T)
+})
+
+####@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@######
+#### 2. Calculating differences between NODf and wNODF ######
+####@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@####
+setwd("C:/Users/carlos/Documents/SCIENCE/PROYECTOS/UTPL/Epifitas/analisis")
+
+dat.nodf<-read.table("NODF.txt", header=T)
+xnodf  = factor(dat.nodf$type, levels=c("EP", "SD", "PO","AM"))
+boxplot(dat.nodf$wnodf~xnodf)
+lm.nodf<-lm(wnodf~xnodf, dat=data) # F3,116=27.29, P<0.0001, R2=0.41)
+
+####@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@######
+#### 3. Calculating differences across types of interactions###
+####@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@######
+
+#Data preparation
+cz.df<-read.table( "dataset_species_c_metrics.txt", header=T)
+ xc  = factor(cz.df$type, levels=c("Comensalistic", "Dispersal", "Pollination","Myrmecophyte"))
+d.df<-read.table( "dataset_species_d_metrics.txt", header=T)
+ xd  = factor(d.df$type, levels=c("Comensalistic", "Dispersal", "Pollination","Myrmecophyte"))
+###Fitting a linear model to species level metrics
+
+lmer.d<-lmer(d.df$d~xd+(1|d.df$site))   #specialization d'
+summary(lmer.d)
+car::Anova(lmer.d, type="III")
+piecewiseSEM::rsquared (lmer.d) 
+
+lmer.c<-lmer(cz.df$c~xc+(1|cz.df$site)) #####Between-module connector values (c-values)
+summary(lmer.c)
+car::Anova(lmer.c, type="III")
+piecewiseSEM::rsquared (lmer.c)
+ 
+###Fitting a linear model with network size as covariable
+
+data<-read.table("tropical_networks.txt", sep="\t",header=T,  dec=".")
+ 
+#Reordering type of interactions according to expected specialization 
+data0<-data[-c(110),]     #NA's C
+x0  = factor(data0$type, levels=c("Comensalistic", "Dispersal", "Pollination","Myrmecophyte"))
+x1  = factor(data$type, levels=c("Comensalistic", "Dispersal", "Pollination","Myrmecophyte"))
+
+data2<-data[-c(108,109),]     #NA's NODF
+x2  = factor(data2$type, levels=c("Comensalistic", "Dispersal", "Pollination","Myrmecophyte"))
+
+data3<-data[-c(110,111),]     #NA's Q
+x3  = factor(data3$type, levels=c("Comensalistic", "Dispersal", "Pollination","Myrmecophyte"))
+
+pol<-subset(data, type==c("Pollination"))
+com<-subset(data, type==c("Comensalistic"))
+dis<-subset(data, type==c("Dispersal"))
+myr<-subset(data, type==c("Myrmecophyte"))
+
+###Fitting a mixed linear model with network size as covariable and locality as random variable
+
+lmer.Ns<-lme4::lmer(log(data2$NODF)~x2+data2$Species+(1|data2$locality))
+lmer.Hs<-lmer(data$H2~x1+data$Species+(1|data$locality))
+lmer.Qs<-lmer(data3$Q~x3+data3$Species+(1|data3$locality))
+
+summary(lmer.Ns)
+summary(lmer.Hs)
+summary(lmer.Qs)
+
+car::Anova(lmer.Ns,  type="II")
+car::Anova(lmer.Hs,  type="II")
+car::Anova(lmer.Qs,  type="III")
+
+piecewiseSEM::rsquared (lmer.Ns)   
+piecewiseSEM::rsquared (lmer.Hs) 
+piecewiseSEM::rsquared (lmer.Qs) 
