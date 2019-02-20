@@ -1,6 +1,6 @@
 ###########################################################################
 ##Code necessary  to reproduce analyses in Naranjo et al 2019, AoB Plants##
-###		           Author: Carlos Lara (February 2019)                    ###
+###		           Author: Carlos Lara (February 2019)                  ###
 ###########################################################################
 
 #Dataset required can be downloaded from figshare: 
@@ -523,7 +523,7 @@ piecewiseSEM::rsquared (lmer.c)
  
 ###Fitting a linear model with network size as covariable
 
-data<-read.table("tropical_networks.txt", sep="\t",header=T,  dec=".")
+data<-read.table("dataset_network_metrics.txt", sep="\t",header=T,  dec=".")
  
 #Reordering type of interactions according to expected specialization 
 data0<-data[-c(110),]     #NA's C
