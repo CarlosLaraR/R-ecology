@@ -3,10 +3,12 @@
 ###		           Author: Carlos Lara (February 2019)                    ###
 ###########################################################################
 
+#Dataset required can be downloaded from figshare: 
 library(bipartite)
 library(vegan)
 library(lme4)
- 
+
+
 ####@@@@@@@@@@@@@@@@@@@@@@@@@@@@#######
 #### 1. Calculating network metrics####
 ####@@@@@@@@@@@@@@@@@@@@@@@@@@@@#######
