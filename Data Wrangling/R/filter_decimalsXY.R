@@ -3,7 +3,7 @@
 #x is a vector with longitude and y is a vector with latitud. 
 #Threshold is the number of decimal places uses to filter the data
 
-filter_decimals <- function(x,y,DF) { 
+filter_decimalsXY <- function(x,y,DF) { 
   require(magrittr)
   require(dplyr)
   #Longitude
