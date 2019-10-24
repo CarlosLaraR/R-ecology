@@ -19,6 +19,6 @@ filter_decimalsXY <- function(x,y,DF) {
   y_nchr[y_nchr < 0] = 0
   DF$y_nchr <- y_nchr
   DF<-filter(DF, y_nchr!=0 & x_nchr!=0)
-  DF<-DF[,-c("y_nchr","x_nchr"]
+  DF<-DF[,-c("y_nchr","x_nchr")]
   return(DF)
 } 
