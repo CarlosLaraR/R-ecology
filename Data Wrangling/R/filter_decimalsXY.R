@@ -7,13 +7,13 @@ filter_decimalsXY <- function(x,y,DF) {
   require(magrittr)
   require(dplyr)
   #Longitude
-  x_nchr = x %>% as.numeric() %>% abs() %>% as.character() %>% nchar() %>% as.numeric()
+  x_nchr = x %>% abs() %>% as.character() %>% nchar() %>% as.numeric()
   x_int = floor(x) %>% abs() %>% nchar()
   x_nchr = x_nchr - 1 - x_int
   x_nchr[x_nchr < 0] = 0
   DF$x_nchr<-x_nchr
   #Latitude
-  y_nchr = y %>% as.numeric() %>% abs() %>% as.character() %>% nchar() %>% as.numeric()
+  y_nchr = y %>% abs() %>% as.character() %>% nchar() %>% as.numeric()
   y_int = floor(y) %>% abs() %>% nchar()
   y_nchr = y_nchr - 1 - y_int
   y_nchr[y_nchr < 0] = 0
