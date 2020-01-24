@@ -1,12 +1,18 @@
-####Identify and removes mismatches between geographic coordinates and their reported country. 
-
-# The mian argument to this function is a data.frame in which:
-#   - A column contains the longitude in degrees
-#   - A column contains the latitude in degrees
-#   - A column contains ISO3 country code
-
-#The other three arguments are used to identify the name of the column that contains coordinates and country code.
-#Records with NA as countrycode are not removed.
+#' filter_countriesXY
+#'
+#' Identify and removes mismatches between geographic coordinates and their reported country
+#'
+#' @param my.df Data.frame with at least three columns which contains the longitude and latitude in degrees and the ISO3 country code
+#' @param longitude.name The name of the column which contains the longitude in degrees
+#' @param latitude.name The name of the column which contains the latitude in degrees
+#' @param countrycode.name The name of the column which contains ISO3 country code code
+#'
+#' @return A data.frame containing the records considered correct. Records with NA as countrycode are not removed
+#' @export
+#' @examples 
+#' my.df<-data.frame(decimallatitude=c(34.96388, 34.75000, 21.11120), decimallongitude=c(33.66284, 32.63333, 33.25000),  
+#' countrycode=c("CYP","CYP","CYP"))
+#' prueba<-filter_countriesXY(my.df,latitude.name="decimallatitude", longitude.name="decimallongitude", countrycode.name="countrycode")
 
 filter_countriesXY = function(my.df, longitude.name, latitude.name, countrycode.name)
 {  
