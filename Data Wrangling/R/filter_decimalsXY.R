@@ -1,7 +1,16 @@
-#This function stimate how many decimal places have each case lat/long coordiante and remove imprecise locations without decimal places
-#DF is a data.frame containing at least longitude and latitude 
-#x is a vector with longitude and y is a vector with latitud. 
-#Threshold is the number of decimal places uses to filter the data
+#' filter_decimalsXY
+#'
+#' This function stimate how many decimal places have each case lat/long coordiante and remove imprecise locations without decimal places.
+#'
+#' @param DF  Data.frame is a data.frame containing at least longitude and latitude
+#' @param x is a vector with longitude
+#' @param y is a vector with latitude
+#'
+#' @return A data.frame containing the records considered correct.
+#' @export
+#' @examples 
+#' my.df<-data.frame(decimallatitude=c(34.96388, 34.75000, 21.11120), decimallongitude=c(33.66284, 32.63333, 33.25000))
+#' prueba<-filter_decimalsXY(DF=my.df,x="decimallatitude", y="decimallongitude")
 
 filter_decimalsXY <- function(x,y,DF) { 
   require(magrittr)
