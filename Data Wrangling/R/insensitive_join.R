@@ -1,5 +1,13 @@
-#Case-insensitive joins for dplyr (inner_join, left_join, full_join, semi_join_anti_join).
-#NOte: It has only be tested with inner_join. It should work with  the other types of joins.
+#' insensitive_join
+#'
+#' Case-insensitive joins for dplyr (inner_join, left_join, full_join, semi_join_anti_join). It has only be tested with inner_join.
+#'
+#' @param fun is a join function defined in dplyr
+#'
+#' @return A data.frame containing the records considered correct.
+#' @export
+#' @examples 
+#' insentivie_join (fun=inner_join) (df.X, df.Y, by=list(x="field.X", y="field.Y")
 
 insensitive_join <- function(fun,...) { 
   require(dplyr)
