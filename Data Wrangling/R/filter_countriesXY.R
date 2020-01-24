@@ -8,7 +8,7 @@
 #The other three arguments are used to identify the name of the column that contains coordinates and country code.
 #Records with NA as countrycode are not removed.
 
-filter_countriesXY = function(my.df, latitude.name, longitude.name, countrycode.name)
+filter_countriesXY = function(my.df, longitude.name, latitude.name, countrycode.name)
 {  
 require(sp)
 require(rworldmap) #low resolution map
