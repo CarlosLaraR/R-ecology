@@ -15,7 +15,7 @@ replaceNulltoNaList <- function (my.list, FUN, ...)
   {
       if (is.list(my.list)) {
           for (i in seq_along(my.list)) {
-              my.list[i] <- list(replaceNaList(my.list[[i]], FUN, ...))
+              my.list[i] <- list(replaceNulltoNaList(my.list[[i]], FUN, ...))
           }
           my.list
       }
