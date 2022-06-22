@@ -1,66 +1,116 @@
-spindle.diagram<-function(df,title="plot",temp.var=NULL,relative=F,orientation="vertical",
-                          predict.span=.75,x.interval=1,spindle.colors="black",size=.6)
+spindle.diagram<-function(df,name="plot",temp.var=NULL,relative=F,orientation="vertical",
+                          predict.span=.25,x.interval=1,spindle.colors="black",size=.6,
+                          real.zeros=F, x.lab=NULL)
 {
   if (is.na(pmatch(orientation,c("vertical","horizontal")))) 
     stop("invalid ordering method")
   
-  if(is.null(temp.var)){temp<-as.numeric(rownames(df))}
-  if(is.numeric(temp.var))
+  if(is.null(temp.var)){temp<-as.numeric(rownames(df))} # check for temporal variable definition
+  if(!is.null(temp.var))
   {
-    temp<-df[,temp.var]
-    df<-df[,-temp.var]
+    if(!is.numeric(df[,temp.var])){stop("temporal variable needs to be numeric!")}
+    if(is.numeric(df[,temp.var])) # Check if temporal variable is numeric.
+    {
+      temp<-df[,temp.var]
+      predict.temp<-seq(min(df[,temp.var]),max(df[,temp.var]),.1)
+      df<-df[,-which(colnames(df)==temp.var)]
+    }
   }
-  if (is.vector(spindle.colors))
+  
+  if (is.vector(spindle.colors) && length(spindle.colors)==1) # Spindle colors
+  {cols<-rep(spindle.colors,ncol(df))}
+  if(is.vector(spindle.colors) && length(spindle.colors)>1)
   {
-    if (length(spindle.colors)==1){cols<-rep(spindle.colors,ncol(df))}
-    if(length(spindle.colors)>1)
-      {
-      if(length(spindle.colors)!=ncol(df))
-        stop("color vector length mismatch")
-      else
-        cols<-spindle.colors 
-      }
+    if(length(spindle.colors)!=ncol(df))
+      stop("color vector length mismatch")
+    else
+      cols<-spindle.colors 
   }
-  if(isTRUE(relative)){df<-df/rowSums(df)}
-    
+  if(!is.vector(spindle.colors)){stop("spindle.colors is not a vetor!")}
+  
+  if(isTRUE(relative)) # convert to relative values?
+  {
+    if(all(rowSums(df)==1)){}
+    else{df<-df/rowSums(df)}
+  }
+  
   # Loess predictions for each group
-  p.df<-df ; p.df[]<-NA
+  p.df<-as.data.frame(matrix(NA,nrow=length(predict.temp),ncol=ncol(df))); colnames(p.df)<-colnames(df)
   for (m in 1:ncol(df))
   {
-    p.df[,m]<-predict(loess(df[,m]~temp,span=predict.span))
-    #a[which(M[,m]==0)]<-0
-    non.zero<-which(df[,m]>0)
-    if(isTRUE(min(non.zero)!=1)){p.df[1:min(non.zero),m]<-0}
-    if(isTRUE(max(non.zero)!=length(a))){p.df[max(non.zero):length(p.df[,m]),m]<-0} 
+    p.df[,m]<-predict(loess(df[,m]~temp,span=predict.span),predict.temp)
+    if(real.zeros==T)
+    {
+      p.df[which(p.df[,m]<0),m]<-0
+      non.zeros<-temp[which(df[,m]>0)]
+      zeros<-temp[which(df[,m]==0)]
+      
+      
+      if(isTRUE(min(non.zeros)!=min(temp)))
+      {
+        mm<-max(zeros[which(zeros<min(non.zeros))])
+        p.df[1:which(predict.temp==mm),m]<-0
+      }
+      if(isTRUE(max(non.zeros)!=max(temp)))
+      {
+        MM<-min(zeros[which(zeros>min(non.zeros))])
+        p.df[which(predict.temp==MM):length(p.df[,m]),m]<-0
+      }  
+    }
+    else{p.df[which(p.df[,m]<0),m]<-0}
   }
   
   # Starting point for each frequency shape
-  start.m<-cbind(cumsum(apply(df,2,function(x) max(x))),apply(df,2,function(x) max(x)/2))
+  start.m<-cbind(cumsum(apply(df,2,function(x) max(x,na.rm=T))),apply(df,2,function(x) max(x,na.rm=T)/2))
   for (s in 2:nrow(start.m))
   {
     start.m[s,2]<-start.m[s-1,1]+start.m[s,2]
   }
-  start.m<-start.m[,2]
+  #start.m<-start.m[,2]
+  
+  
   
   if(isTRUE(orientation=="vertical"))
   {
-   plot(0,xlim=c(0,sum(apply(df,2,max))),ylim=c(min(temp),max(temp)),
-        type="n",axes=F,xlab="",ylab="time",main=print(title))
-   abline(h=c(1,seq(from=1,to=max(temp),by=1)),col="grey95",lwd=6)
-   axis(2,at=seq(min(temp),max(temp),by=x.interval),las=2,cex.axis=size)
-   axis(1, at=start.m, labels=colnames(df),las=2,cex.axis=size)
-   for (p in 1:length(start.m))
-   {polygon(start.m[p]+(c(p.df[,p]/2,0-rev(p.df[,p]/2))),c(temp,rev(temp)),border="white",col=cols[p])}  
- }
+    plot(0,xlim=c(0,max(start.m[,1])),ylim=c(min(temp),max(temp)),
+         type="n",axes=F,ylab="",xlab="G",main=print(name))
+    l<-par("usr")
+    clip(l[1],l[2],l[3],l[4])
+    abline(h=c(1,seq(from=1,to=max(temp),by=1)),col="grey95",lwd=6)
+    axis(2,at=seq(min(temp),max(temp),by=x.interval),las=1,cex.axis=size)
+    axis(1, at=start.m[,2], labels=colnames(df),las=1,cex.axis=size)
+    for (p in 1:length(start.m[,2]))
+    {
+      non.zero<-which(p.df[,p]!=0)
+      if(length(non.zero)!=0)
+      {
+        if(isTRUE(min(non.zero)==1)){m<-1} else{m<-min(non.zero)}
+        if(isTRUE(max(non.zero)==length(predict.temp))){M<-length(p.df[,p])} else{M<-max(non.zero)}
+        polygon(start.m[p,2]+(c(p.df[m:M,p]/2,0-rev(p.df[m:M,p]/2))),c(predict.temp[m:M],rev(predict.temp[m:M])),col=cols[p])
+      }
+      else{}
+    }   
+  }
   
   if(isTRUE(orientation=="horizontal"))
   {
-   plot(0,ylim=c(0,sum(apply(df,2,max))),xlim=c(min(temp),max(temp)),
-        type="n",axes=F,ylab="",xlab="time",main=print(title))
-   abline(v=c(1,seq(from=1,to=max(temp),by=1)),col="grey95",lwd=6)
-   axis(1,at=seq(min(temp),max(temp),by=x.interval),las=1,cex.axis=size)
-   axis(2, at=start.m, labels=colnames(df),las=1,cex.axis=size)
-   for (p in 1:length(start.m))
-   {polygon(c(temp,rev(temp)),start.m[p]+(c(p.df[,p]/2,0-rev(p.df[,p]/2))),border="white",col=cols[p])}  
- }
+    plot(0,ylim=c(0,max(start.m[,1])),xlim=c(min(temp),max(temp)),
+         type="n",axes=F,ylab="",xlab=x.lab,main=print(name))
+    l<-par("usr")
+    clip(l[1],l[2],l[3],l[4])
+    abline(v=c(1,seq(from=1,to=max(temp),by=1)),col="grey95",lwd=6)
+    axis(1,at=seq(min(temp),max(temp),by=x.interval),las=1,cex.axis=size)
+    axis(2, at=start.m[,2], labels=colnames(df),las=1,cex.axis=size)
+    for (p in 1:length(start.m[,2]))
+    {
+      non.zero<-which(p.df[,p]!=0)
+      if(length(non.zero)!=0)
+      {
+        if(isTRUE(min(non.zero)==1)){m<-1} else{m<-min(non.zero)}
+        if(isTRUE(max(non.zero)==length(predict.temp))){M<-length(p.df[,p])} else{M<-max(non.zero)}
+        polygon(c(predict.temp[m:M],rev(predict.temp[m:M])),start.m[p,2]+(c(p.df[m:M,p]/2,0-rev(p.df[m:M,p]/2))),col=cols[p])
+      }
+      else{}
+    }  
+  }
 }
