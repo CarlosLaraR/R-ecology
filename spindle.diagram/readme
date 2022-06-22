@@ -1,7 +1,8 @@
-This function plots the temporal phenological spectra of a group of organisms using ah adjusted polynomial function over each group data.
-It is included in the package {forraGEO}.
+This is a modification of a function included in the R package {forraGEO}.  
+The function plots the temporal phenological spectra of a group of organisms using ah adjusted polynomial function over each group data.
 
-Author(s)
+
+Author original function:
 
 Javier Valverde javi.val.mor@gmail.com
 
