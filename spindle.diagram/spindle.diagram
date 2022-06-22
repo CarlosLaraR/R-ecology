@@ -73,7 +73,7 @@ spindle.diagram<-function(df,name="plot",temp.var=NULL,relative=F,orientation="v
   if(isTRUE(orientation=="vertical"))
   {
     plot(0,xlim=c(0,max(start.m[,1])),ylim=c(min(temp),max(temp)),
-         type="n",axes=F,ylab="",xlab="G",main=print(name))
+         type="n",axes=F,ylab="",xlab="G",main="")
     l<-par("usr")
     clip(l[1],l[2],l[3],l[4])
     abline(h=c(1,seq(from=1,to=max(temp),by=1)),col="grey95",lwd=6)
@@ -95,7 +95,7 @@ spindle.diagram<-function(df,name="plot",temp.var=NULL,relative=F,orientation="v
   if(isTRUE(orientation=="horizontal"))
   {
     plot(0,ylim=c(0,max(start.m[,1])),xlim=c(min(temp),max(temp)),
-         type="n",axes=F,ylab="",xlab=x.lab,main=print(name))
+         type="n",axes=F,ylab="",xlab=x.lab,main="")
     l<-par("usr")
     clip(l[1],l[2],l[3],l[4])
     abline(v=c(1,seq(from=1,to=max(temp),by=1)),col="grey95",lwd=6)
