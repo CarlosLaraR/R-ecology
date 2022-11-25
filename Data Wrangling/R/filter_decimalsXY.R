@@ -27,7 +27,7 @@ filter_decimalsXY <- function(x,y,DF) {
   y_nchr = y_nchr - 1 - y_int
   y_nchr[y_nchr < 0] = 0
   DF$y_nchr <- y_nchr
-  DF<-filter(DF, y_nchr!=0 & x_nchr!=0)
+  DF<-dplyr::filter(DF, y_nchr!=0 & x_nchr!=0)
   rm_col <- c("x_nchr", "y_nchr")
   DF<-DF[, !(colnames(DF) %in% rm_col), drop = FALSE]
   return(DF)
