@@ -39,7 +39,7 @@ pts<-my.df[,c(longitude.name,latitude.name)]
   flag<- ifelse(is.na(my.df[,countrycode.name]) | as.character(my.df[,countrycode.name])==as.character(my.df$iso3), "YES", "NO")
 my.df$flag<-flag
 my.df2<-my.df %>% dplyr::filter(flag %in% "YES")
-my.df2<-select(my.df2, -c(flag,iso3))
+my.df2<-dplyr::select(my.df2, -c(flag,iso3))
 dif<-nrow(my.df)-nrow(my.df2)
 message(sprintf("Removed %s records.", dif))
 my.df2
