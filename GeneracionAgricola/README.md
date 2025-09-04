@@ -1,1 +1,1 @@
-
+Simulation programme in R to simulate different crop generations and stochastic events related to climate, pests and socio-politics in the context of the teaching innovation activity "Generación Agrícola".
